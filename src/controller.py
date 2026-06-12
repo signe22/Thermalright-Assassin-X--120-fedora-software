@@ -23,19 +23,21 @@ digit_to_segments = {
     9: ['a', 'b', 'g', 'f', 'c', 'd'],
 }
 
+# 7-segment encoding: order [f, a, b, g, e, d, c] matching layout.json segment map
+# Segments:  f  a  b  g  e  d  c
 digit_mask = np.array(
     [
-        [1, 1, 1, 1, 1, 1, 1],  # 0
-        [1, 1, 1, 1, 1, 1, 1],  # 1
-        [1, 1, 1, 1, 1, 1, 1],  # 2
-        [1, 1, 1, 1, 1, 1, 1],  # 3
-        [1, 1, 1, 1, 1, 1, 1],  # 4
-        [1, 1, 1, 1, 1, 1, 1],  # 5
-        [1, 1, 1, 1, 1, 1, 1],  # 6
-        [1, 1, 1, 1, 1, 1, 1],  # 7
-        [1, 1, 1, 1, 1, 1, 1],  # 8
-        [1, 1, 1, 1, 1, 1, 1],  # 9
-        [1, 1, 1, 1, 1, 1, 1],  # nothing
+        [1, 1, 1, 0, 1, 1, 1],  # 0 → a,b,c,d,e,f
+        [0, 0, 1, 0, 0, 0, 1],  # 1 → b,c
+        [0, 1, 1, 1, 1, 1, 0],  # 2 → a,b,d,e,g
+        [0, 1, 1, 1, 0, 1, 1],  # 3 → a,b,c,d,g
+        [1, 0, 1, 1, 0, 0, 1],  # 4 → b,c,f,g
+        [1, 1, 0, 1, 0, 1, 1],  # 5 → a,c,d,f,g
+        [1, 1, 0, 1, 1, 1, 1],  # 6 → a,c,d,e,f,g
+        [0, 1, 1, 0, 0, 0, 1],  # 7 → a,b,c
+        [1, 1, 1, 1, 1, 1, 1],  # 8 → all
+        [1, 1, 1, 1, 0, 1, 1],  # 9 → a,b,c,d,f,g
+        [0, 0, 0, 0, 0, 0, 0],  # blank (fill_value=-1)
     ]
 )
 
@@ -104,7 +106,9 @@ class Controller:
 
     def get_device(self):
         try:
-            return hid.Device(self.VENDOR_ID, self.PRODUCT_ID)
+            dev = hid.device()
+            dev.open(self.VENDOR_ID, self.PRODUCT_ID)
+            return dev
         except Exception as e:
             print(f"Error initializing HID device: {e}")
             return None

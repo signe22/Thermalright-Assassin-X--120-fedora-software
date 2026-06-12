@@ -32,18 +32,31 @@ It provides a Python controller to display system metrics (CPU/GPU temp/usage) a
     cd digital_thermal_right_lcd
     ```
 
-2.  **Create a virtual environment and install dependencies:**
+### Option A: Standard Linux Distributions (Ubuntu, Debian, Arch...)
+
+1.  **Create a virtual environment and install dependencies:**
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
     ```
 
-3.  **Run the installation script:**
+2.  **Run the installation script:**
     This script will set up the `udev` rule to allow running without `sudo` and create a `systemd` service to run the display controller on startup.
     ```bash
     sudo ./install.sh
     ```
+
+### Option B: Fedora (Optimized for SELinux & System Packages)
+
+Fedora enforces strict SELinux security policies that prevent systemd from executing binaries (including Python virtual environments) located inside user home directories. A dedicated installer is provided to use official system-wide packages and compile drivers cleanly.
+
+1.  **Run the Fedora setup script:**
+    Run this script with your **standard user account** (do NOT use `sudo ./fedora_setup.sh`; the script will prompt for your sudo password when executing system package installations):
+    ```bash
+    ./fedora_setup.sh
+    ```
+    This script will automatically install the official Fedora Python libraries (including GUI/Tkinter support), download the necessary compilation tools (`gcc`, `libdrm-devel`) to build the GPU monitor, install the required packages system-wide by bypassing PEP 668, register the `udev` rule, and start the systemd service using the official system python interpreter.
 
 ## Usage
 

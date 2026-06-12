@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Detect Fedora and redirect to fedora_setup.sh
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "fedora" ]; then
+        echo "===================================================="
+        echo "Fedora détecté / Fedora detected!"
+        echo "Veuillez lancer ./fedora_setup.sh avec votre utilisateur standard (sans sudo)."
+        echo "Please run ./fedora_setup.sh with your normal user (without sudo)."
+        echo "===================================================="
+        exit 1
+    fi
+fi
+
 # Check for Python
 if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
     echo "Python is not installed. Please install it."
