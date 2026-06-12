@@ -17,27 +17,27 @@ echo -e "${CYAN}====================================================${NC}"
 # Check for root / sudo
 if [ "$EUID" -eq 0 ]; then
     CURRENT_USER=$(logname 2>/dev/null || echo $USER)
-    echo -e "${RED}Veuillez ne PAS exécuter ce script directement en tant que root.${NC}"
-    echo -e "${YELLOW}Lancez-le avec votre utilisateur standard ($CURRENT_USER). Le script demandera votre mot de passe sudo pour installer les paquets système.${NC}"
+    echo -e "${RED}Please do NOT run this script directly as root.${NC}"
+    echo -e "${YELLOW}Run it with your standard user ($CURRENT_USER). The script will prompt for your sudo password to install system packages.${NC}"
     exit 1
 fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SUDO_USER=${SUDO_USER:-$USER}
 
-echo -e "\n${YELLOW}[1/5] Installation des paquets officiels Fedora (système, compilation & GUI)...${NC}"
+echo -e "\n${YELLOW}[1/5] Installing official Fedora packages (system, compilation & GUI)...${NC}"
 sudo dnf install -y python3-hidapi python3-numpy python3-psutil python3-tkinter jq gcc python3-devel libdrm-devel python3-pip
 
-echo -e "\n${GREEN}[✔] Paquets système Fedora installés !${NC}"
+echo -e "\n${GREEN}[✔] Fedora system packages installed!${NC}"
 
-echo -e "\n${YELLOW}[2/5] Installation des modules Python pour la surveillance GPU (AMD & NVIDIA)...${NC}"
+echo -e "\n${YELLOW}[2/5] Installing Python modules for GPU monitoring (AMD & NVIDIA)...${NC}"
 # Use --break-system-packages because Fedora enforces PEP 668 (externally-managed-environment)
 sudo pip3 install --break-system-packages pyamdgpuinfo pynvml || {
-    echo -e "${YELLOW}[!] Warning: Impossible d'installer pyamdgpuinfo ou pynvml.${NC}"
-    echo -e "${YELLOW}Si vous n'utilisez pas de carte graphique dédiée ou si vous êtes hors ligne, vous pouvez ignorer cela.${NC}"
+    echo -e "${YELLOW}[!] Warning: Failed to install pyamdgpuinfo or pynvml.${NC}"
+    echo -e "${YELLOW}If you do not use a dedicated graphics card or are offline, you can safely ignore this.${NC}"
 }
 
-echo -e "\n${YELLOW}[3/5] Configuration des règles d'accès USB (udev)...${NC}"
+echo -e "\n${YELLOW}[3/5] Configuring USB access rules (udev)...${NC}"
 UDEV_RULE_FILE="/etc/udev/rules.d/70-digital-thermal-right-lcd.rules"
 
 sudo bash -c "cat > $UDEV_RULE_FILE" << EOL
@@ -47,9 +47,9 @@ EOL
 
 sudo udevadm control --reload-rules
 sudo udevadm trigger
-echo -e "${GREEN}[✔] Règle udev configurée.${NC}"
+echo -e "${GREEN}[✔] udev rules configured.${NC}"
 
-echo -e "\n${YELLOW}[4/5] Déploiement du service systemd sécurisé pour Fedora...${NC}"
+echo -e "\n${YELLOW}[4/5] Deploying secure systemd service for Fedora...${NC}"
 SERVICE_FILE="/etc/systemd/system/digital-thermal-right-lcd.service"
 
 # We use the official system python interpreter to bypass SELinux home execution block!
@@ -69,9 +69,9 @@ User=${SUDO_USER}
 WantedBy=multi-user.target
 EOL
 
-echo -e "${GREEN}[✔] Fichier de service systemd créé.${NC}"
+echo -e "${GREEN}[✔] systemd service file created.${NC}"
 
-echo -e "\n${YELLOW}[5/5] Activation et démarrage du service...${NC}"
+echo -e "\n${YELLOW}[5/5] Enabling and starting the service...${NC}"
 sudo systemctl daemon-reload
 sudo systemctl enable digital-thermal-right-lcd.service
 sudo systemctl restart digital-thermal-right-lcd.service
@@ -79,15 +79,15 @@ sudo systemctl restart digital-thermal-right-lcd.service
 # Make other scripts executable
 chmod +x led_control.sh uninstall.sh install.sh fedora_setup.sh
 
-echo -e "\n${YELLOW}Attente de l'initialisation de l'affichage (3s)...${NC}"
+echo -e "\n${YELLOW}Waiting for display initialization (3s)...${NC}"
 sleep 3
 
-echo -e "\n${GREEN}[✔] Statut du service systemd :${NC}"
+echo -e "\n${GREEN}[✔] systemd service status:${NC}"
 sudo systemctl status digital-thermal-right-lcd.service --no-pager
 
 echo -e "\n${CYAN}====================================================${NC}"
-echo -e "${GREEN}🎉 Succès complet !${NC}"
-echo -e "L'écran de votre Thermalright TL-AX120 R affiche maintenant la température CPU/GPU en temps réel."
-echo -e "\nPour personnaliser les couleurs, la vitesse ou tester les presets, lancez :"
+echo -e "${GREEN}🎉 Complete Success!${NC}"
+echo -e "Your Thermalright TL-AX120 R display is now showing CPU/GPU temperatures in real-time."
+echo -e "\nTo customize colors, speed, or test presets, run:"
 echo -e "  ${YELLOW}./led_control.sh${NC}"
 echo -e "====================================================${NC}"

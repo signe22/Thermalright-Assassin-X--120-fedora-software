@@ -5,8 +5,7 @@ if [ -f /etc/os-release ]; then
     . /etc/os-release
     if [ "$ID" = "fedora" ]; then
         echo "===================================================="
-        echo "Fedora détecté / Fedora detected!"
-        echo "Veuillez lancer ./fedora_setup.sh avec votre utilisateur standard (sans sudo)."
+        echo "Fedora detected!"
         echo "Please run ./fedora_setup.sh with your normal user (without sudo)."
         echo "===================================================="
         exit 1
